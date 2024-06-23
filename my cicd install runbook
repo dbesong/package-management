@@ -1,0 +1,259 @@
+CICD tools installation
+
+
+Maven
+
+# install Java openJDK 11+ as a pre-requisit for maven to run.
+sudo hostnamectl set-hostname maven
+sudo su - ec2-user
+cd /opt
+sudo yum install wget nano tree unzip git-all -y
+sudo yum install java-11-openjdk-devel java-1.8.0-openjdk-devel -y
+java -version
+git --version
+
+
+#2. Download, extract and Install Maven
+#Step1) Download the Maven Software
+sudo wget https://dlcdn.apache.org/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.zip
+sudo unzip apache-maven-3.9.6-bin.zip
+sudo rm -rf apache-maven-3.9.6-bin.zip
+sudo mv apache-maven-3.9.6/ maven
+
+[ec2-user@maven maven]$ pwd
+/opt/maven
+  Maven home = M2_HOME   
+  Maven home: /opt/maven
+  MHD = /opt/maven [ M2_HOME ]:
+
+export M2_HOME=/opt/maven
+export PATH=$PATH:$M2_HOME/bin
+
+sudo vi ~/.bash_profile
+
+MHD = /opt/maven 
+The MHD is where the maven software is extracted.
+   wget url  
+   unzip  maven.zip  
+
+
+
+Requirements:
+1. project repository in the SCM [GitHub / GitLab]
+   https://github.com/Landmark-Technologies/maven-standalone-application
+2. We need a server with java & maven installed and configured   
+3. Create a project directory in the maven build server
+    mkdir java-projects   
+4. Clone the codes from github into the project directory 
+   git clone https://github.com/Landmark-Technologies/maven-standalone-application
+
+
+
+[ec2-user@maven jp]$ ls maven-standalone-application/
+pom.xml  src
+
+
+
+in opt directory you will find maven 
+create a directory called JP in opt.
+In JP clone the code from GitHub and name it to a few words e.g mwa
+cd into mwa and it is in mwa that you run the mvn commands
+make sure the directories have permissions that allows for actions especially the JP directory.
+
+
+
+
+
+
+
+Tomcat
+
+
+Create ec2 redhat instance
+create security group with port 8080 and attach to the instance
+install java OpenJDK 1.8+
+
+
+sudo hostnamectl set-hostname tomcat
+sudo su - ec2-user
+cd /opt
+sudo yum install git wget -y unzip zip nano tree
+sudo yum install java-1.8.0-openjdk-devel -y
+
+
+sudo wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.89/bin/apache-tomcat-9.0.89.zip
+sudo unzip apache-tomcat-9.0.89.zip
+sudo rm -rf apache-tomcat-9.0.89.zip
+sudo mv apache-tomcat-9.0.89 tomcat9
+
+sudo chmod 777 -R /opt/tomcat9
+sudo chown ec2-user -R /opt/tomcat9
+sh /opt/tomcat9/bin/startup.sh
+
+
+
+change tomcat default port from 8080 to 8088
+vi into server.xml and change ports to 8088 and restart tomcat
+vi /opt/tomcat9/conf/server.xml
+
+
+create tomcat users with access roles in the tomcat-users.xml file
+
+vi /opt/tomcat9/conf/tomcat-users.xml
+
+<user username="landmark" password="admin123" roles="manager-gui,admin-gui,manager-script"/>
+<user username="simon" password="admin123" roles="admin-gui"/>
+
+
+require manager gui to have access to tomcat from browser
+
+
+
+
+
+configure external access by vi into context.xml and commenting the 127 valve.
+
+vi /opt/tomcat9/webapps/manager/META-INF/context.xml comment the 127 valve save and exit
+
+
+
+copy war file from maven server to tomcat server 
+
+while in mwa scp -i testing36 target/tesla.war ec2-user@3.80.237.150:/opt/tomcat9/webapps/
+make sure key is saved in a file created
+to protect key chmod 400 key name
+
+
+vi /opt/tomcat9/webapps/app/jsps/home.jsp for hot fixes
+
+
+
+SonarQube
+
+
+
+Installation of sonarqube:
+  https://docs.sonarqube.org/latest/requirements/requirements/
+  https://www.sonarqube.org/downloads/
+https://github.com/LandmakTechnology/package-management/tree/master/soarQube-Installation
+publicIP = 100.26.230.233
+ssh -i "key36.pem" ec2-user@100.26.230.233
+
+Installation of sonarqube:
+sudo useradd sonar
+# Grand sudo access to sonar user
+sudo echo "sonar ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/sonar
+# set hostname for the sonarqube server
+sudo hostnamectl set-hostname sonar 
+sudo su - sonar
+
+sudo passwd sonar
+
+#Enable password authentication
+
+sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
+sudo service sshd restart
+
+cd /opt
+sudo yum install unzip wget git vim -y
+sudo yum install java-11-openjdk-devel -y
+
+
+sudo wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.8.zip
+sudo unzip sonarqube-7.8.zip
+sudo rm -rf sonarqube-7.8.zip
+sudo mv sonarqube-7.8 sonarqube
+
+sudo chown -R sonar:sonar /opt/sonarqube/
+sudo chmod -R 775 /opt/sonarqube/
+
+sh /opt/sonarqube/bin/linux-x86-64/sonar.sh start
+sh /opt/sonarqube/bin/linux-x86-64/sonar.sh status     
+
+access sonarqube on the browser
+
+
+In SonarQube, the bin directory host the linuxx86-64 directory which host the sonar.sh file. This file is used to start stop, restart or reload SonarQube e.g
+while in linuxx86-64 run sh sonar.sh start to start SonarQube
+
+The config directory host the sonar.properties file in which we update the port for SonarQube i.e from 9000 to what ever port number.
+
+Then go to the POM.xml file in maven and in the properties section, update it with the SonarQube server ip and SonarQube login and password information.
+
+
+
+
+
+Nexus
+
+#!/bin/bash
+sudo hostnamectl set-hostname nexus
+sudo useradd nexus
+sudo echo "nexus ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/nexus
+sudo su - nexus
+cd /opt
+
+sudo yum install wget git nano unzip -y
+sudo yum install java-11-openjdk-devel java-1.8.0-openjdk-devel -y
+sudo wget http://download.sonatype.com/nexus/3/nexus-3.15.2-01-unix.tar.gz
+sudo tar -zxvf nexus-3.15.2-01-unix.tar.gz
+sudo mv /opt/nexus-3.15.2-01 /opt/nexus
+sudo rm -rf nexus-3.15.2-01-unix.tar.gz
+
+sudo chown -R nexus:nexus /opt/nexus
+sudo chown -R nexus:nexus /opt/sonatype-work
+sudo chmod -R 775 /opt/nexus
+sudo chmod -R 775 /opt/sonatype-work
+
+
+echo run_as_user="nexus" > /opt/nexus/bin/nexus.rc
+sudo ln -s /opt/nexus/bin/nexus /etc/init.d/nexus
+sudo systemctl enable nexus
+sudo systemctl start nexus
+sudo systemctl status nexus
+echo "end of nexus installation"
+
+
+In the nexus windows, create two repositories (one for releases and one for snapshots). Copy these two repositories to pom.xml file at the distribution management tag. Replace them with the repositories existing there. 
+
+If you are building maven SonarQube with no Jenkins, go to the settings.xml file located in maven/conf/settings.xml directories and under the server tag, copy a server snippet and update with the nexus server access.
+
+If you are building pipeline with with Jenkins, go to /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.7/conf/settings.xml and under the server tag, copy a snippet and update with the server details
+
+
+
+
+
+
+Jenkins
+
+
+#!/bin/bash
+sudo timedatectl set-timezone Canada/Mountain
+sudo hostnamectl set-hostname jenkins
+sudo yum install wget tree vim git nano unzip -y
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo yum upgrade -y
+# Add required dependencies for the jenkins package
+sudo yum install java-11-openjdk -y
+sudo yum install jenkins -y
+sudo systemctl daemon-reload
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+echo "echo of jenkins installation"
+sudo su - ec2-user
+
+
+
+in Jenkins, add maven by going to tools and scrolling down to maven. Select the maven version --> maven3.9.7 same version as listed just below.
+save and quit. 
+
+Then go to build steps and in maven select the maven3.9.7 that pops up. then in goals, type clean package. do same for the next build step and put sonar:sonar s goal. do same for next build step and put deploy as goal
+
+
+Do not forget to add your gitgub repository and if private configure credentials.
+
+http://3.80.18.169:8080/    Jenkins url
