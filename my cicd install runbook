@@ -216,9 +216,9 @@ echo "end of nexus installation"
 
 In the nexus windows, create two repositories (one for releases and one for snapshots). Copy these two repositories to pom.xml file at the distribution management tag. Replace them with the repositories existing there. 
 
-If you are building maven SonarQube with no Jenkins, go to the settings.xml file located in maven/conf/settings.xml directories and under the server tag, copy a server snippet and update with the nexus server access.
+If you are building maven SonarQube with no Jenkins, go to the settings.xml file located in maven/conf/settings.xml directories and under the server tag, copy a server snippet and update with the nexus server access credentials.
 
-If you are building pipeline with with Jenkins, go to /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.7/conf/settings.xml and under the server tag, copy a snippet and update with the server details
+If you are building pipeline with with Jenkins, go to /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.7/conf/settings.xml and under the server tag, copy a snippet and update with the server access credential details
 
 
 
