@@ -140,14 +140,15 @@ publicIP = 100.26.230.233
 ssh -i "key36.pem" ec2-user@100.26.230.233
 
 Installation of sonarqube:
-sudo useradd sonar
+
 # Grand sudo access to sonar user
 sudo echo "sonar ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/sonar
 # set hostname for the sonarqube server
 sudo hostnamectl set-hostname sonar 
-sudo su - sonar
 
+sudo useradd sonar
 sudo passwd sonar
+sudo su - sonar
 
 #Enable password authentication
 
