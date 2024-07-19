@@ -30,7 +30,7 @@ export M2_HOME=/opt/maven
 export PATH=$PATH:$M2_HOME/bin
 
 sudo vi ~/.bash_profile
-
+source ~/.bash_profile
 MHD = /opt/maven 
 The MHD is where the maven software is extracted.
    wget url  
