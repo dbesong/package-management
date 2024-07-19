@@ -333,3 +333,126 @@ $ sudo yum install python3 -y
 $ sudo alternatives --set python /usr/bin/python3
 $ sudo yum -y install python3-pip -y
 $ pip3 install ansible --user
+
+
+
+
+plugins: blue ocean, deploy to container, jacoco plugin
+
+
+
+Nature of application:
+We support critical applications for a FinTech/e-commerce CLIENTS 
+DevOps/JENKINS is all about automation   
+7Cs:
+  CD,t---> Continuous Development [Git/GitHub/IDEs /GitBranch/gitTag 
+
+  CI ---> Continuous Integration [Git/GitHub/Jenkins/maven/sonarqube/nexus] 
+              [Build and Release Engineering]
+
+  CD --> Continuous Delivery [build=packages/artifacts-->testing/UAT--manualApproval--- prod]
+  
+  CD --> Continuous Deployment [build=packages/artifacts-->testing/UAT--auto--- prod]
+  
+  CM --> Continuous Monitoring
+            https://www.tesla.com/en_ca/powerwall  
+            https://www.tesla.com/en_ca/modelx
+
+   CS --> Continuous security
+   CT --> Continuous Testing 
+
+
+Tesla Client:
+   java web applications    
+1. We have created and shared the project GitHub repo  with developers 
+      https://github.com/LandmakTechnology/maven-web-application 
+
+Ticket002:
+  Create an automation ci/cd job using Jenkins and other associated tools 
+  for a FinTech Java based web application.    
+solution:
+1. connect to your jenkins server online 
+   jenkins_url = http://54.237.55.112:8080/
+   username    = classs36   
+   password    = admin123   
+2. create a ci/cd freestyle job for the client-tesla   
+
+3. configure Jenkins Git Integration
+   Ensure that Git plugins/Software is installed in the Jenkins server   
+   sudo yum install git -y
+
+    public project repo: 
+   https://github.com/LandmakTechnology/maven-web-application
+    private project repo: 
+   https://github.com/LandmakTechnology/maven-web-app
+
+        userName: legah2045   
+        password: Admin@123  
+   PERSONAL Access token: -----------
+4. Jenkins maven Integration 
+      Jenkins-Dashboard--manage Jenkins ---Tools and configure --maven   
+
+4. Jenkins sonarQube Integration   mvn sonar:sonar :
+----------------------------------------------  
+----------------------------------------------  
+NB: Your SonarQube server must be running 
+    sudo su - sonar 
+      sh /opt/sonarqube/bin/linux-x86-64/sonar.sh status
+      sh /opt/sonarqube/bin/linux-x86-64/sonar.sh start 
+      curl -v 34.213.64.100:9000 
+
+    1. Edit pom.xml propertiesTAG with SonarQube server URL and login Credentials 
+       in the Property TAG  
+       http://172.31.23.193:9000/
+       18.117.135.248:9000
+         username: admin 
+         password: admin 
+
+      <Property>
+
+2. Open required ports in Jenkins server to allow traffic from jenkins
+   port 9000 should be open in the firewall/security group
+  or Install and configure JaCoCo plugin in Jenkins UI:
+
+5. Jenkins Nexus Integration;  mvn deploy:
+=======================================
+1. create, configure and setup a redhat server with nexus installed   
+   sudo systemctl start nexus
+
+2. Create artifactories repos in nexus 
+   NEXUSserverIP:portNumber  
+   18.189.7.116:8081/
+   http://18.189.7.116:8081/repository/tesla-wp-release/
+   http://18.189.7.116:8081/repository/tesla-wp-snapshots/
+
+3. modify 'distributionManagement' tag with nexus repos details  in  pom.xml
+        vi pom.xml
+  <distributionManagement>
+      <repository>
+        <id>nexus</id>
+        <name>Landmark Technologies Releases Nexus Repository</name>
+        <url>http://3.137.166.218:8081/repository/tesla-releases/</url>
+      </repository>
+      
+      <snapshotRepository>
+        <id>nexus</id>
+        <name>Landmark Technologies Snapshot Nexus Repository </name>
+        <url>http://3.137.166.218:8081/repository/tesla-snapshots/</url>
+      </snapshotRepository>
+      
+  </distributionManagement>
+
+4. modify conf/setting.xml in JENKINS-server with nexus login credentials  
+vi /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.6/conf/settings.xml
+
+
+            <server>
+                <id>nexus</id>
+                <username>admin</username>
+                <password>admin123</password>
+            </server>
+
+  [INFO] Working dir: /var/lib/jenkins/workspace/tesla-webapp/target/sonar
+
+
+
