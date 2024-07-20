@@ -262,82 +262,16 @@ http://3.80.18.169:8080/    Jenkins url
 
 
 
+important directories found in jenkins home directory (/var/lib/jenkins
+jobs, tools, workspace, logs, secrets, users,credentials.xml, updates, usercontent, config.xml
 
 
-Playbook to create ansible and push public ssh key to slave nodes.
-
-# ansible <group/host Name> -m ping -u <userName> --private-key=~/devops.pem
-# ansible-playbook -b ansible-createuser.yml -u <userName> --private-key=~/devops.pem
-- hosts: all
-  tasks:
-  - name: Create Ansible User
-    user:
-      name: ansible
-      create_home: true
-      shell: /bin/bash
-      comment: "Ansible Management Account"
-      expires: -1
-      password: "{{ 'DevOps@2020' | password_hash('sha512','A512') }}"
-  - name: Deploy Local User SSH Key
-    authorized_key:
-      user: ansible
-      state: present
-      manage_dir: true
-      key: "{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub') }}"
-  - name: Setup Sudo Access for Ansible User
-    copy:
-      dest: /etc/sudoers.d/ansible
-      content: 'ansible ALL=(ALL) NOPASSWD: ALL' 
-      validate: /usr/sbin/visudo -cf %s
-  -  name: Disable Password Authentication
-     lineinfile:
-        dest=/etc/ssh/sshd_config
-        regexp='^PasswordAuthentication'
-        line="PasswordAuthentication no"
-        state=present
-        backup=yes
-     notify:
-       - restart ssh
-  handlers:
-  - name: restart ssh
-    service:
-      name=sshd
-      state=restarted
+general areas
+discard old builds, this project is parameterized, disable project
 
 
 
-
-
-
-
-Ansible Installation
-Ansible is designed to run on Unix/Linux systems, therefore windows systems aren’t supported for the control node.
-
-Ansible is python based and therefore the control node and the managed nodes need to have python2 or python3 installed on them.
-
-Ansible can be installed in three ways: . Using yum or apt . Using pip . Using compile file https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
-
-Installing Ansible on Ubuntu
-$ sudo adduser ansible
-$ echo "ansible ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
-$ sudo su - ansible
-$ sudo apt-add-repository ppa:ansible/ansible
-$ sudo apt install ansible -y
-
-Ansible installation on REDHAT EC2
-$sudo useradd ansible
-$sudo hostname ansible
-$echo "ansible ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
-$sudo su - ansible # Enable PassowrdLogin and assign password to ansible user
-$ sudo yum install python3 -y
-$ sudo alternatives --set python /usr/bin/python3
-$ sudo yum -y install python3-pip -y
-$ pip3 install ansible --user
-
-
-
-
-plugins: blue ocean, deploy to container, jacoco plugin
+plugins: blue ocean, deploy to container, jacoco plugin, maven integration
 
 
 
@@ -455,4 +389,72 @@ vi /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.6/conf/s
   [INFO] Working dir: /var/lib/jenkins/workspace/tesla-webapp/target/sonar
 
 
+Playbook to create ansible and push public ssh key to slave nodes.
 
+# ansible <group/host Name> -m ping -u <userName> --private-key=~/devops.pem
+# ansible-playbook -b ansible-createuser.yml -u <userName> --private-key=~/devops.pem
+- hosts: all
+  tasks:
+  - name: Create Ansible User
+    user:
+      name: ansible
+      create_home: true
+      shell: /bin/bash
+      comment: "Ansible Management Account"
+      expires: -1
+      password: "{{ 'DevOps@2020' | password_hash('sha512','A512') }}"
+  - name: Deploy Local User SSH Key
+    authorized_key:
+      user: ansible
+      state: present
+      manage_dir: true
+      key: "{{ lookup('file', '/home/ansible/.ssh/id_rsa.pub') }}"
+  - name: Setup Sudo Access for Ansible User
+    copy:
+      dest: /etc/sudoers.d/ansible
+      content: 'ansible ALL=(ALL) NOPASSWD: ALL' 
+      validate: /usr/sbin/visudo -cf %s
+  -  name: Disable Password Authentication
+     lineinfile:
+        dest=/etc/ssh/sshd_config
+        regexp='^PasswordAuthentication'
+        line="PasswordAuthentication no"
+        state=present
+        backup=yes
+     notify:
+       - restart ssh
+  handlers:
+  - name: restart ssh
+    service:
+      name=sshd
+      state=restarted
+
+
+
+
+
+
+
+Ansible Installation
+Ansible is designed to run on Unix/Linux systems, therefore windows systems aren’t supported for the control node.
+
+Ansible is python based and therefore the control node and the managed nodes need to have python2 or python3 installed on them.
+
+Ansible can be installed in three ways: . Using yum or apt . Using pip . Using compile file https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
+Installing Ansible on Ubuntu
+$ sudo adduser ansible
+$ echo "ansible ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
+$ sudo su - ansible
+$ sudo apt-add-repository ppa:ansible/ansible
+$ sudo apt install ansible -y
+
+Ansible installation on REDHAT EC2
+$sudo useradd ansible
+$sudo hostname ansible
+$echo "ansible ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/ansible
+$sudo su - ansible # Enable PassowrdLogin and assign password to ansible user
+$ sudo yum install python3 -y
+$ sudo alternatives --set python /usr/bin/python3
+$ sudo yum -y install python3-pip -y
+$ pip3 install ansible --user
