@@ -271,7 +271,7 @@ discard old builds, this project is parameterized, disable project
 
 
 
-plugins: blue ocean, deploy to container, jacoco plugin, maven integration
+plugins: blue ocean, deploy to container,deploy to weblogic, jacoco plugin, maven integration, Safe Restart, next build number,ssh agent,email externsion template, sonarqube scanner, audit trail plugin,job import plugin, schedule builds, artifactory plugin, cloud foundry, build name setter
 
 
 
@@ -387,6 +387,59 @@ vi /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/maven3.9.6/conf/s
             </server>
 
   [INFO] Working dir: /var/lib/jenkins/workspace/tesla-webapp/target/sonar
+
+
+
+4b. Open required ports[8081/8089] in the Nexus server to allow traffic from jenkins server
+    in order to perform codeQuality analysis
+
+5. deploy to tomcat via JENKINS-TOMCAT INTEGRATION:
+===================================================
+ 5a - create, configure and setup a redhat server with tomcat installed  
+   1. INSTALL 'Deploy to container' Plugin on Jenkins UI
+   This plugin allows you to deploy a war to a container after a successful build. 
+   server address = http://3.144.85.2:8088/
+
+In the configuration in jenkins do the following
+target/*war
+then tomcat server url with credentials to access
+
+  ensure
+
+5b-  ADD A TOMCAT USER in /tomcat9/conf/tomcat-users.xml 
+   sudo vi /opt/tomcat9/conf/tomcat-users.xml
+<user username="myLandmark" password="admin123" roles="manager-gui,admin-gui,manager-script"/>
+<user username="landmark" password="admin123" roles="manager-gui,admin-gui,manager-script"/>
+
+   http://54.152.168.210:8088/tesla/
+
+ 5c- Open required ports[8080] in tomcat server to allow traffic from jenkins server
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Playbook to create ansible and push public ssh key to slave nodes.
