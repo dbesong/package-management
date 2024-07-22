@@ -553,11 +553,11 @@ sudo docker ps
 
 Java install
 
-sudo apt install openjdk-11-jre
+sudo apt install openjdk-11-jre -y
 
 Maven install
 
-sudo apt install maven
+sudo apt install maven -y
 # install docker in Amazon Linux
 ###########################
 sudo yum update -y    
